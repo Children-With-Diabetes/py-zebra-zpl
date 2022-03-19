@@ -6,12 +6,14 @@ class InvalidElementError(Exception):
 
 class Label:
 
-    def __init__(self, width=100, length=100, dpi=203, print_speed=2, copies=1):
+    def __init__(self, width=100, length=100, dpi=203, print_speed=2, copies=1, darkness=None, media_type=None):
         self.width = width
         self.length = length
         self.dpi = dpi
         self.print_speed = print_speed
         self.copies = copies
+        self.darkness = darkness
+        self.media_type = media_type
 
         self.elements = []
 
@@ -22,12 +24,19 @@ class Label:
     def dump_contents(self, io=sys.stdout):
         # Start format
         io.write('^XA')
+
+        # Set printing darkness
+        if self.darkness is not None:
+            io.write(f'~SD{self.darkness}')
+        
+        # Set the media type (Transfer or Direct)
+        if self.media_type is not None:
+            io.write(f'^MT{self.media_type}')
+
         # ^LL<label height in dots>,<space between labels in dots>
         io.write(f'^LL{self.length}')
         # ^LH<label home - x,y coordinates of top left label>
         io.write('^LH0,0')
-        # ^LS<shift the label to the left(or right)>
-        io.write('^LS10')
         # ^PW<label width in dots>
         io.write(f'^PW{self.width}')
         # Print Rate(speed) (^PR command)
